@@ -46,14 +46,19 @@ def register():
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+
+    # Check if user already exists
     cursor.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
     if cursor.fetchone():
         return jsonify({'message': 'User already exists!'}), 400
 
-    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    role = data.get('role', 'user')
+    # Check if this is the first user
+    cursor.execute("SELECT COUNT(*) AS user_count FROM users")
+    user_count = cursor.fetchone()['user_count']
 
-    if role == 'admin':
+    role = data.get('role', 'user')
+    if role == 'admin' and user_count > 0:
+        # Only allow admin creation if an admin is already logged in
         if 'Authorization' not in request.headers:
             return jsonify({'message': 'Admin creation requires admin privileges!'}), 403
         token = request.headers['Authorization'].split(" ")[1]
@@ -66,6 +71,8 @@ def register():
         except:
             return jsonify({'message': 'Invalid token!'}), 401
 
+    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
+
     cursor.execute(
         "INSERT INTO users (email, password, role) VALUES (%s, %s, %s)",
         (data['email'], hashed_password, role)
@@ -73,6 +80,7 @@ def register():
     conn.commit()
     cursor.close()
     conn.close()
+
     return jsonify({'message': 'User registered successfully!'}), 201
 
 @auth_endpoint.route('/login', methods=['POST'])
