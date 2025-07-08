@@ -51,7 +51,7 @@ def register():
     if data['email'] in users_db:
         return jsonify({'message': 'User already exists!'}), 400
         
-    hashed_password = generate_password_hash(data['password'], method='sha256')
+    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     
     # Default role is 'user', unless specified otherwise
     role = data.get('role', 'user')

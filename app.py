@@ -16,12 +16,12 @@ CORS(app)
 Swagger(app)
 
 # JWT Configuration
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(book_endpoint, url_prefix='/api/book')
 app.register_blueprint(database_endpoints, url_prefix='/database')
-app.register_blueprint(auth_endpoint, url_prefix='/auth')
+app.register_blueprint(auth_endpoint, url_prefix='/api/auth')
 app.register_blueprint(protected_data_endpoint, url_prefix='/protected')
 
 @app.route('/')
